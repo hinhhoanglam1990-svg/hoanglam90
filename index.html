@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tra Cứu Năm Sinh Âm Lịch (Can Chi)</title>
+    <!-- Nhúng thư viện Tailwind CSS để làm giao diện đẹp tự động -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-amber-50 to-orange-50 text-slate-800 font-sans p-4 md:p-8 min-h-screen flex items-center justify-center">
+
+    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-amber-100">
+        <!-- Phần đầu trang mang phong cách truyền thống -->
+        <div class="bg-gradient-to-r from-red-700 to-amber-700 p-6 text-white text-center shadow-md">
+            <h1 class="text-xl md:text-2xl font-bold tracking-wide">🔮 TRA CỨU NĂM ÂM LỊCH</h1>
+            <p class="text-amber-100 text-xs mt-1">Đổi năm sinh dương lịch sang hệ Can Chi</p>
+        </div>
+
+        <div class="p-6 space-y-6">
+            <!-- Khu vực nhập năm sinh -->
+            <div>
+                <label for="namDuongLich" class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Nhập năm sinh dương lịch</label>
+                <input type="number" id="namDuongLich" value="1990" min="1900" max="2100" 
+                    class="mt-2 block w-full p-3 border-2 border-amber-200 rounded-xl bg-amber-50/30 text-center text-xl font-bold text-red-700 shadow-sm focus:border-red-600 focus:ring-0 focus:outline-none transition-all"
+                    placeholder="Ví dụ: 1990, 2015...">
+            </div>
+
+            <!-- Khu vực hiển thị kết quả -->
+            <div id="khuVucKetQua" class="bg-gradient-to-b from-red-50 to-amber-50 border border-red-100 rounded-2xl p-5 text-center shadow-inner">
+                <span class="text-xs font-bold uppercase tracking-widest text-red-800">Năm âm lịch của bạn là</span>
+                
+                <!-- Tên Can Chi to, rõ ràng -->
+                <h2 id="txtCanChi" class="text-4xl font-black text-red-700 my-2 tracking-wide">...</h2>
+                
+                <!-- Chi tiết ý nghĩa -->
+                <div class="mt-4 pt-3 border-t border-red-200/60 text-sm space-y-2 text-slate-700 text-left">
+                    <p>🔹 <strong>Thiên Can:</strong> <span id="txtCan">...</span></p>
+                    <p>🔹 <strong>Địa Chi (Con giáp):</strong> <span id="txtChi">...</span></p>
+                </div>
+            </div>
+            
+            <p class="text-[11px] text-center text-slate-400 font-medium">Hệ thống tự động tính toán dựa trên thuật toán Can Chi cổ truyền.</p>
+        </div>
+    </div>
+
+    <!-- SCRIPT TỰ ĐỘNG TÍNH CAN CHI -->
+    <script>
+        // Mảng lưu danh sách 10 Thiên Can (Tính theo số cuối của năm)
+        const danhSachCan = ["Canh", "Tân", "Nhâm", "Quý", "Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ"];
+        
+        // Mảng lưu danh sách 12 Địa Chi (Tính theo số dư khi chia cho 12)
+        const danhSachChi = ["Thân", "Dậu", "Tuất", "Hợi", "Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi"];
+
+        // Hàm xử lý chính
+        function tinhCanChi() {
+            const inputNam = document.getElementById('namDuongLich').value;
+            const nam = parseInt(inputNam);
+
+            // Kiểm tra nếu người dùng nhập số năm hợp lệ
+            if (!isNaN(nam) && nam > 0) {
+                // Công thức tính Can: Lấy chữ số cuối cùng của năm
+                const chiSoCan = nam % 10;
+                const tenCan = danhSachCan[chiSoCan];
+
+                // Công thức tính Chi: Lấy năm chia cho 12 lấy số dư
+                const chiSoChi = nam % 12;
+                const tenChi = danhSachChi[chiSoChi];
+
+                // Hiển thị kết quả lên màn hình
+                document.getElementById('txtCanChi').innerText = `${tenCan} ${tenChi}`;
+                document.getElementById('txtCan').innerText = tenCan;
+                document.getElementById('txtChi').innerText = tenChi;
+            } else {
+                // Nếu ô nhập trống hoặc không hợp lệ
+                document.getElementById('txtCanChi').innerText = "---";
+                document.getElementById('txtCan').innerText = "...";
+                document.getElementById('txtChi').innerText = "...";
+            }
+        }
+
+        // Lắng nghe sự kiện: Người dùng gõ đến đâu, tính kết quả ngay đến đó
+        document.getElementById('namDuongLich').addEventListener('input', tinhCanChi);
+
+        // Chạy tính toán mẫu lần đầu tiên khi vừa tải trang
+        tinhCanChi();
+    </script>
+</body>
+</html>
