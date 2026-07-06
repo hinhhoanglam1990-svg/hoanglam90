@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Điểm Danh Lớp Học</title>
+    <!-- Thư viện giao diện Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans p-4 md:p-8 min-h-screen flex justify-center items-start">
+
+    <div class="max-w-2xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+        <!-- Tiêu đề trang -->
+        <div class="bg-gradient-to-r from-teal-600 to-emerald-600 p-6 text-white text-center">
+            <h1 class="text-2xl font-bold tracking-wide">📋 ĐIỂM DANH LỚP HỌC HẰNG NGÀY</h1>
+            <p id="txtNgayThang" class="text-teal-100 text-sm mt-1">Ngày --/--/----</p>
+        </div>
+
+        <!-- Khối thống kê nhanh (Scannable) -->
+        <div class="grid grid-cols-3 gap-2 p-4 bg-slate-50 border-b border-slate-100 text-center text-sm">
+            <div class="bg-blue-50 p-3 rounded-xl border border-blue-100">
+                <p class="text-xs text-blue-600 font-bold uppercase">Sĩ số</p>
+                <p id="statTong" class="text-xl font-black text-blue-700 mt-1">0</p>
+            </div>
+            <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100">
+                <p class="text-xs text-emerald-600 font-bold uppercase">Hiện diện</p>
+                <p id="statHienDien" class="text-xl font-black text-emerald-700 mt-1">0</p>
+            </div>
+            <div class="bg-rose-50 p-3 rounded-xl border border-rose-100">
+                <p class="text-xs text-rose-600 font-bold uppercase">Vắng</p>
+                <p id="statVang" class="text-xl font-black text-rose-700 mt-1">0</p>
+            </div>
+        </div>
+
+        <!-- Danh sách học sinh -->
+        <div class="p-4">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Danh sách học sinh</h2>
+            <div id="danhSachHocSinh" class="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+                <!-- Học sinh sẽ tự động được thêm vào đây bằng JavaScript -->
+            </div>
+        </div>
+
+        <!-- Khu vực nút chức năng -->
+        <div class="p-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row gap-2">
+            <button onclick="copyBaoCao()" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm">
+                📢 Copy nhanh danh sách vắng
+            </button>
+            <button onclick="lamMoiDiemDanh()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-4 rounded-xl transition-all text-sm">
+                🔄 Reset điểm danh
+            </button>
+        </div>
+    </div>
+
+    <!-- BỘ NÃO XỬ LÝ ĐIỂM DANH -->
+    <script>
+        // MẪU DANH SÁCH HỌC SINH (Chị hãy thay đổi tên học sinh lớp mình ở đây nha)
+        const hocSinhGoc = [
+            "01. Nguyễn An Bình",
+            "02. Trần Minh Bảo",
+            "03. Lê Hoàng Duy",
+            "04. Phạm Thùy Dương",
+            "05. Vũ Khánh Huyền"
+        ];
+
+        // Khởi tạo trạng thái điểm danh từ LocalStorage (nếu có) hoặc mặc định là đi học đủ (true)
+        let trangThaiDiemDanh = JSON.parse(localStorage.getItem('diemDanhLopHoc'));
+        if (!trangThaiDiemDanh) {
+            trangThaiDiemDanh = hocSinhGoc.map(name => ({ name, diHoc: true }));
+        }
+
+        // Hiển thị ngày tháng hiện tại lên tiêu đề
+        const homNay = new Date();
+        document.getElementById('txtNgayThang').innerText = `Ngày ${homNay.getDate()}/${homNay.getMonth() + 1}/${homNay.getFullYear()}`;
+
+        // Hàm vẽ danh sách học sinh ra màn hình
+        function hienThiDanhSach() {
+            const container = document.getElementById('danhSachHocSinh');
+            container.innerHTML = '';
+
+            let countHienDien = 0;
+            let countVang = 0;
+
+            trangThaiDiemDanh.forEach((hs, index) => {
+                if (hs.diHoc) countHienDien++; else countVang++;
+
+                // Tạo hàng cho từng học sinh
+                const row = document.createElement('div');
+                row.className = `flex justify-between items-center p-3 rounded-xl border transition-all ${hs.diHoc ? 'bg-white border-slate-200 shadow-sm' : 'bg-rose-50/70 border-rose-200'}`;
+
+                row.innerHTML = `
+                    <span class="font-medium ${hs.diHoc ? 'text-slate-700' : 'text-rose-700 line-through'}">${hs.name}</span>
+                    <div class="flex gap-1">
+                        <button onclick="doiTrangThai(${index}, true)" class="px-3 py-1.5 rounded-lg font-bold text-xs transition-all ${hs.diHoc ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'}">
+                            Có mặt
+                        </button>
+                        <button onclick="doiTrangThai(${index}, false)" class="px-3 py-1.5 rounded-lg font-bold text-xs transition-all ${!hs.diHoc ? 'bg-rose-600 text-white shadow-sm' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'}">
+                            Vắng
+                        </button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+
+            // Cập nhật lại các con số thống kê
+            document.getElementById('statTong').innerText = trangThaiDiemDanh.length;
+            document.getElementById('statHienDien').innerText = countHienDien;
+            document.getElementById('statVang').innerText = countVang;
+
+            // Lưu lại vào bộ nhớ máy trình duyệt
+            localStorage.setItem('diemDanhLopHoc', JSON.stringify(trangThaiDiemDanh));
+        }
+
+        // Thay đổi trạng thái đi học của học sinh khi bấm nút
+        function doiTrangThai(index, status) {
+            trangThaiDiemDanh[index].diHoc = status;
+            hienThiDanhSach();
+        }
+
+        // Reset toàn bộ danh sách về trạng thái đi học đầy đủ
+        function lamMoiDiemDanh() {
+            if (confirm("Chị có chắc chắn muốn đặt lại trạng thái điểm danh cho cả lớp không?")) {
+                trangThaiDiemDanh = hocSinhGoc.map(name => ({ name, diHoc: true }));
+                hienThiDanhSach();
+            }
+        }
+
+        // Tính năng Copy nhanh danh sách vắng để gửi phụ huynh
+        function copyBaoCao() {
+            const dsVang = trangThaiDiemDanh.filter(hs => !hs.diHoc).map(hs => hs.name);
+            const ngayStr = document.getElementById('txtNgayThang').innerText;
+            
+            let textBaoCao = `📢 BÁO CÁO ĐIỂM DANH LỚP (${ngayStr}):\n`;
+            textBaoCao += `▪️ Tổng sĩ số: ${trangThaiDiemDanh.length}\n`;
+            textBaoCao += `▪️ Số em vắng mặt: ${dsVang.length}\n`;
+            
+            if (dsVang.length > 0) {
+                textBaoCao += `👉 Danh sách các em vắng:\n` + dsVang.map(name => `   - ${name}`).join('\n');
+            } else {
+                textBaoCao += `🎉 Lớp đi học đầy đủ!`;
+            }
+
+            // Thực hiện copy vào bộ nhớ đệm
+            navigator.clipboard.writeText(textBaoCao).then(() => {
+                alert("Đã copy báo cáo điểm danh! Chị có thể dán (Paste) ngay vào nhóm Zalo phụ huynh.");
+            }).catch(() => {
+                alert("Lỗi! Không thể tự động copy.");
+            });
+        }
+
+        // Chạy hiển thị danh sách ngay khi tải trang
+        hienThiDanhSach();
+    </script>
+</body>
+</html>
